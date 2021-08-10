@@ -7,8 +7,8 @@ export class HttpClient {
   http: httpProcessor;
 
   constructor( urlBase: string ){
-    // this.http = new AxiosProcessor(urlBase);
-    this.http = new FetchProcessor(urlBase);
+    this.http = new AxiosProcessor(urlBase);
+    // this.http = new FetchProcessor(urlBase);
   }
 
   get(path: string, config?: Object | undefined): Promise<any> {
