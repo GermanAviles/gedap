@@ -34,15 +34,29 @@
 </template>
 
 <script lang="ts">
+// import { ref } from 'vue'
 import { Options, Vue } from 'vue-class-component';
-
+import { HttpClient } from '../http/http';
 @Options({
   props: {
     msg: String
-  }
+  },
 })
 export default class HelloWorld extends Vue {
   msg!: string
+  http!: HttpClient;
+
+  mounted(): void {
+    this.cargarDatos();
+  }
+
+  cargarDatos(): void {
+    this.http = new HttpClient('https://api.coindesk.com/v1/');
+    this.http.get('bpi/currentprice.json').then( (response: any) => {
+      console.log('response: ', response);
+    });
+  }
+
 }
 </script>
 
