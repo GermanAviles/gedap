@@ -36,7 +36,7 @@
 <script lang="ts">
 // import { ref } from 'vue'
 import { Options, Vue } from 'vue-class-component';
-import { HttpClient } from '../http/http';
+import { HttpClient } from '../http/http-client';
 @Options({
   props: {
     msg: String
