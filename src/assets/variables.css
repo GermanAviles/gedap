@@ -1,6 +1,9 @@
 :root {
   --navbar-height: 75px;
-  --primary: rgb(4,10,36);
+  --primary:       #040a24;
+  --bg:            #f3f3f3;
+	--color-checked: #29809a;
+	--transition-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   /* --rich-black-fogra-29:              #001427ff;
   --xanadu:                           #708d81ff;
   --jasmine:                          #f4d58dff;

@@ -3,25 +3,19 @@
     <div class="menu">
       <div class="menu__avatar">
         <div class="avatar">
-         <span class="label">GA</span>
+          <span class="label">GA</span>
         </div>
       </div>
       <div class="menu__list-items">
         <ul class="items">
           <li class="item">
-            <a href="#">
-              Quien soy
-            </a>
+            <a href="#">Quien soy</a>
           </li>
           <li class="item">
-            <a href="#">
-              Experiencia
-            </a>
+            <a href="#">Experiencia</a>
           </li>
           <li class="item">
-            <a href="#">
-              Github
-            </a>
+            <a href="#">Github</a>
           </li>
         </ul>
       </div>
@@ -48,6 +42,7 @@ nav.nav.nav-bar {
   height: var(--navbar-height);
   position: sticky;
   top: 0;
+  z-index: 100;
   background: rgb(4,10,36);
   background: linear-gradient(90deg, rgba(4,10,36,1) 0%, rgba(4,13,42,1) 41%, rgba(8,34,61,1) 100%);
 

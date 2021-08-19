@@ -26,20 +26,54 @@
     <!-- Experiencia laboral -->
     <section id="experiencia" class="home__experiencia">
       <div class="experiencia-laboral">
-        Lorem ipsum,
-        dolor sit amet consectetur adipisicing elit.
-        Praesentium harum soluta aliquid veritatis in! Cum eos culpa est. Assumenda,
-        at suscipit! Quod earum cupiditate sapiente vitae optio fugit enim pariatur!
+        <!-- Canvas lineas -->
+        <!-- Opcion time line -->
+        <div class="contenedor-time-line" v-for="(experiencia, index) of experiencias" :key="index">
+          <!-- Camino que lleva a la tarjeta -->
+          <canvas class="canvas-lineas-secuencia" :id="'line-from-check-to-card-' + index"></canvas>
 
-        Lorem ipsum,
-        dolor sit amet consectetur adipisicing elit.
-        Praesentium harum soluta aliquid veritatis in! Cum eos culpa est. Assumenda,
-        at suscipit! Quod earum cupiditate sapiente vitae optio fugit enim pariatur!
+          <!-- Tarjeta con información -->
+          <div class="informacion-experiencia" :id="'informacion-exp-' + index">
+            <div class="card">
+              <div class="card-header">
+                <div class="contenido-header">
+                  <div class="nombre-empresa">
+                    <h4> {{ experiencia.empresa }} </h4>
+                  </div>
+                  <div class="fechas-trabajo">
+                    <span class="fecha-inicio"> Jun 06 2008 </span>
+                    <span class="fecha-fin"> Jun 06 2006 </span>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="contenido-body">
+                  <div class="habilidades-especificas">
+                    <ul class="lista-habilidades">
+                      <li class="habilidad"> habilidad </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        Lorem ipsum,
-        dolor sit amet consectetur adipisicing elit.
-        Praesentium harum soluta aliquid veritatis in! Cum eos culpa est. Assumenda,
-        at suscipit! Quod earum cupiditate sapiente vitae optio fugit enim pariatur!
+          <!-- Check-box y linea vertical -->
+          <div class="check-box-line">
+            <div class="time-line" :id="'line-' + index"></div>
+            <input
+              type="checkbox"
+              :id="'input-' + index"
+              :checked="false"
+              @change="mostrarOcultarLineaCanvas(index, $event)"
+            >
+            <label :for="'input-' + index" class="checkbox">
+              <div class="checkbox__inner">
+                <div class="green__ball" />
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -53,36 +87,208 @@ import { Options, Vue } from 'vue-class-component';
   }
 })
 export default class Home extends Vue {
+  lastTime = 0;
+  t = 1;
+  vertices: any = [
+    { x: 285, y : 130 },
+    { x: 197, y : 130 },
+    { x: 197, y : 36 },
+    { x: 110, y : 36 },
+  ];
+  ctx: any = null;
+  points: any = [];
+  experiencias = [
+    { checked: false, mesesLaborados: 7,  descripcion: '',  empresa: 'Masseq proyectos e ingeniería S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
+    { checked: false, mesesLaborados: 15, descripcion: '',  empresa: 'Interredes S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
+    { checked: false, mesesLaborados: 5,  descripcion: '',  empresa: 'Sigenia S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
+    { checked: false, mesesLaborados: 4,  descripcion: '',  empresa: 'Expansión TI S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() }
+  ];
 
   mounted(): void {
-    // const miLienzo: any = document.getElementById('primera-curva');
-    // console.log('MI lienzo: ', miLienzo);
-    // const lapiz = miLienzo.getContext("2d");
-    // curva cuadratia
-    // lapiz.moveTo(150, 300);
-    // lapiz.quadraticCurveTo(300,150,450,300);
-    // lapiz.stroke();
+    const seccionExperiencia = document.getElementById('experiencia');
+    this.experiencias.forEach( (item, index) => {
+      const canvas = document.getElementById(`line-from-check-to-card-${index}`);
+      const linea = document.getElementById(`line-${index}`);
+      const exper = document.getElementById(`informacion-exp-${index}`);
 
-    // Curva bezier
-    // lapiz.moveTo(50, 200);
-    // lapiz.bezierCurveTo(200, 50, 350, 200, 500, 50);
-    // lapiz.stroke();
+      if (linea) {
+        // const pixelesMultiplicar = 20;
+        // linea.style.height = `${item.mesesLaborados > 12 ? 220 : item.mesesLaborados * pixelesMultiplicar}px`;
+        linea.style.height = `200px`;
+      }
 
-    // var x0 = 50;
-    // var y0 = 100;
-    // var x1 = 150;
-    // var y1 = 100;
-    // var x2 = 200;
-    // var y2 = 250;
-    // lapiz.beginPath();
-    // lapiz.strokeStyle = "#fff"
-    // lapiz.moveTo(x0,y0);
-    // lapiz.arcTo(x1, y1, x2, y2, 150);
-    // lapiz.stroke();
-    // lapiz.fillStyle = "#fff";
-    // lapiz.fill();
-    //Para ver como funcionan los puntos de control
+      if (exper && canvas) {
+        const esNumeroPar = index%2 === 0;
+        const anchoCanvas = seccionExperiencia ? (seccionExperiencia.clientWidth * 0.5) : 0;
+        // Asignamos nuevo ancho al canvas
+        canvas.style.width = `${ anchoCanvas }px`;
+
+        if (esNumeroPar) {
+          canvas.classList.add('float-top-left');
+          exper.classList.add('float-top-left');
+          canvas.style.left = '0';
+        } else {
+          canvas.classList.add('float-top-right');
+          exper.classList.add('float-top-right');
+          canvas.style.right = '0';
+        }
+
+      }
+
+    });
+
+    if (!window.requestAnimationFrame){
+      window.requestAnimationFrame = (callback: any) => {
+        const currTime = new Date().getTime();
+        const timeToCall = Math.max(0, 16 - ( currTime - this.lastTime));
+
+        const id = window.setTimeout( () => {
+          callback(currTime + timeToCall);
+        }, timeToCall);
+
+        this.lastTime = currTime + timeToCall;
+        return id;
+      };
+
+    }
+
+    if (!window.cancelAnimationFrame){
+      window.cancelAnimationFrame = (id) => {
+        clearTimeout(id);
+      };
+    }
   }
+
+  mostrarOcultarLineaCanvas( index: number, event: any ): void {
+    event.stopPropagation();
+    const canvas: HTMLCanvasElement = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
+    const canvasWidth   = canvas?.width;
+    const canvasHeight  = canvas?.height;
+    const ctx = canvas.getContext('2d');
+    this.ctx = ctx;
+    this.ctx.strokeStyle = '#005E74';
+    this.ctx.lineWidth = 1;
+    const esNumeroPar = index%2 === 0;
+    const checked = event.target.checked;
+
+    if (checked) {
+      if (esNumeroPar) {
+        this.graficarLineaIzquierda( canvas, canvasWidth, canvasHeight, ctx )
+      }
+    } else {
+      // Limpiamos el canvas
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+  }
+
+  graficarLineaIzquierda( canvas: HTMLCanvasElement | null, canvasWidth: number, canvasHeight: number, ctx: CanvasRenderingContext2D  | null  ): void {
+    // let startPointWidth = 12;
+    // let endPointWidth   = 15;
+
+    // let startPointHeight = 0;
+    // let endPointHeight   = 0;
+
+    // if (canvas && ctx) {
+    //   ctx.strokeStyle = '#040a24f5';
+    //   ctx.lineWidth = 1;
+    //   ctx.beginPath();
+
+    //   // Dibujar linea horizontal larga
+    //   startPointHeight = canvasHeight - 20;
+    //   for(let i = 1; i <= 18; i++) {
+
+    //     ctx.moveTo(canvasWidth - startPointWidth, startPointHeight);
+    //     ctx.lineTo(canvasWidth - endPointWidth, startPointHeight);
+    //     ctx.stroke();
+
+    //     if ( i < 18 ) {
+    //       startPointWidth = endPointWidth + 2;
+    //       endPointWidth   = startPointWidth + 3;
+    //     }
+
+    //   }
+
+    //   // Dibujar linea vertical
+    //   startPointHeight = 19;
+    //   endPointHeight   = startPointHeight + 4;
+
+    //   for(let i = 1; i <= 12 ; i++) {
+
+    //     ctx.moveTo(canvasWidth - (endPointWidth + 3), canvasHeight - startPointHeight);
+    //     ctx.lineTo(canvasWidth - (endPointWidth + 3), canvasHeight - endPointHeight);
+    //     ctx.stroke();
+
+    //     if ( i < 12 ) {
+    //       startPointHeight = endPointHeight + 2;
+    //       endPointHeight   = startPointHeight + 6;
+    //     }
+    //   }
+
+    //   // Ultima linea horizontal
+    //   startPointHeight = canvasHeight - (endPointHeight + 3);
+
+    //   startPointWidth = endPointWidth + 3;
+    //   endPointWidth = startPointWidth + 3;
+    //   for(let i = 1; i <= 12 ; i++) {
+
+    //     ctx.moveTo(canvasWidth - startPointWidth, startPointHeight);
+    //     ctx.lineTo(canvasWidth - endPointWidth, startPointHeight);
+    //     ctx.stroke();
+
+    //     if ( i < 12 ) {
+    //       startPointWidth = endPointWidth + 2;
+    //       endPointWidth   = startPointWidth + 3;
+    //     }
+    //   }
+
+    //   ctx.closePath();
+    // }
+
+    this.points = this.calcWaypoints(this.vertices);
+    // extend the line from start to finish with animation
+    this.animate();
+  }
+
+  // Función que calcula los puntos que de la linea
+  calcWaypoints( vertices: any ) {
+    const waypoints = [];
+    for (var i = 1; i < vertices.length; i++) {
+        var pt0 = vertices[i - 1];
+        var pt1 = vertices[i];
+        var dx = pt1.x - pt0.x;
+        var dy = pt1.y - pt0.y;
+        for (var j = 0; j < 100; j++) {
+            var x = pt0.x + dx * j / 100;
+            var y = pt0.y + dy * j / 100;
+            waypoints.push({
+                x: x,
+                y: y
+            });
+        }
+    }
+    return waypoints;
+  }
+
+  // Función que dibuja la linea en el canvas
+  animate(): void {
+    console.log('moveTo =>', this.points[ this.t - 1 ]);
+    console.log('lineTo =>', this.points[ this.t ]);
+
+    if (this.t < this.points.length - 1) {
+      requestAnimationFrame( this.animate );
+    }
+    // draw a line segment from the last waypoint
+    // to the current waypoint
+    this.ctx.beginPath();
+    const grosorLinea = 4;
+    this.ctx.moveTo(this.points[this.t + grosorLinea].x, this.points[this.t + grosorLinea].y);
+    this.ctx.lineTo(this.points[this.t].x, this.points[this.t].y);
+    this.ctx.stroke();
+
+    this.t = this.t + 6;
+  }
+
 
 }
 </script>
@@ -151,6 +357,42 @@ export default class Home extends Vue {
     background: var(--white);
     color: var(--primary);
     padding: 50px 0 0 0;
+
+    .experiencia-laboral {
+      display: flex;
+      flex-flow: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px 0;
+
+
+      .contenedor-time-line {
+        position: relative;
+        width: 100%;
+
+        .canvas-lineas-secuencia {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+        }
+
+        .informacion-experiencia {
+          position: absolute;
+        }
+
+        .check-box-line {
+          display: flex;
+          flex-flow: column;
+          align-items: center;
+
+          .time-line {
+            height: 90px;
+            border-left: 3px dashed #040d299c;
+          }
+        }
+      }
+
+    }
   }
 }
 
@@ -167,7 +409,100 @@ export default class Home extends Vue {
   }
 }
 
+.float-top-left {
+  top: 0;
+  left: 40px;
+}
 
+.float-top-right {
+  top: 0;
+  right: 40px;
+}
+
+.card {
+  min-width: 280px;
+  max-width: 400PX;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  word-wrap: break-word;
+  background-color: #fefefe;
+  background-clip: border-box;
+  border: 0 solid #e0e0e0;
+  border-radius: .25rem;
+  margin-bottom: 24px;
+  padding: 10px;
+  box-shadow:
+    2px 2px 3px rgba(black, 0.12), 2px 2px 6px rgba(black, 0.05),
+		2px 2px 10px rgba(black, 0.025), inset -2px -2px 3px rgba(black, 0.05),
+		inset -2px -2px 8px rgba(black, 0.02), inset 1px 3px 3px rgba(white, 0.45),
+		inset 3px 8px 25px rgba(white, 0.35), inset 3px 2px 3px rgba(white, 0.35),
+		inset 3px 2px 5px rgba(white, 0.2), inset 2px 3px 8px rgba(white, 0.085),
+		inset 3px 2px 18px rgba(white, 0.05), inset 2px 3px 25px rgba(white, 0.025),
+		inset 8px 8px 18px rgba(white, 0.1), inset 8px 8px 25px rgba(white, 0.05);
+}
+
+.card-body {
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding: 0.5rem 1.2rem;
+}
+
+.card-header {
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding: 5px;
+}
+
+.contenido-header {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+
+  .nombre-empresa {
+    font-size: 1.1rem;
+    padding: 0 1px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .fechas-trabajo {
+    display: flex;
+    flex-flow: row wrap;
+    padding: 0 5px;
+
+    span {
+      display: inline-block;
+      padding: 1px 9px;
+      border-radius: 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .fecha-inicio {
+      margin: 0 5px 0 0;
+      background-color: #64718a;
+      color: var(--white);
+    }
+
+    .fecha-fin {
+      margin: 0 0 0 5px;
+      background-color: #1f355f;
+      color: var(--white);
+    }
+  }
+
+}
+
+.contenido-body {
+  .habilidades-especificas {
+    ul.lista-habilidades {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
 // .wave-animation {
 //   animation: move-forever 10s cubic-bezier(.55, .5, .45, .5) infinite;
 //   &:nth-child(1) {
@@ -189,5 +524,133 @@ export default class Home extends Vue {
 //     transform: translate3d(85px, 0, 0);
 //   }
 // }
+// .cont-input-check {
+//   position: relative;
+//   padding: 30px 0;
+//   width: 12.25%;
+//   height: auto;
+// }
+
+// input[type='checkbox']#checkbox-t+label {
+//   border: 1px solid rgb(0, 0, 0);
+//   background: tranparent;
+//   border-radius: 50%;
+// }
+
+// input[type='checkbox']#checkbox-t+label::before {
+//   content: '';
+//   width: 20px;
+//   height: 20px;
+//   top: 0;
+//   left: 0;
+//   bottom: -60px;
+//   right: 0;
+//   position: absolute;
+//   margin: auto;
+//   background: rgb(0, 0, 0);
+//   border-radius: 50%;
+//   transition: 0.2s, ease, all;
+// }
+
+// input[type='checkbox']#checkbox-t:checked+label::before {
+//   bottom: 0;
+// }
+
+input[type="checkbox"] {
+	display: none;
+
+	&:checked {
+		+ label.checkbox {
+			.checkbox__inner {
+				.green__ball {
+					transform: translate(-50%, -50%) scale(1);
+					opacity: 1;
+					transition-delay: 15ms;
+				}
+			}
+		}
+		~ .checkbox__text {
+			opacity: 1;
+			.checkbox__text--options {
+				span {
+					&.off {
+						transform: translateY(150%);
+						opacity: 0;
+					}
+					&.on {
+						transform: translateY(0%);
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+}
+
+.checkbox {
+	--size: 40px;
+  margin: 10px;
+	width: var(--size);
+	height: var(--size);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	background: var(--bg);
+	box-shadow:
+		2px 2px 3px rgba(black, 0.12), 2px 2px 6px rgba(black, 0.05),
+		2px 2px 10px rgba(black, 0.025), inset -2px -2px 3px rgba(black, 0.05),
+		inset -2px -2px 8px rgba(black, 0.02), inset 1px 3px 3px rgba(white, 0.45),
+		inset 3px 8px 25px rgba(white, 0.35), inset 3px 2px 3px rgba(white, 0.35),
+		inset 3px 2px 5px rgba(white, 0.2), inset 2px 3px 8px rgba(white, 0.085),
+		inset 3px 2px 18px rgba(white, 0.05), inset 2px 3px 25px rgba(white, 0.025),
+		inset 8px 8px 18px rgba(white, 0.1), inset 8px 8px 25px rgba(white, 0.05);
+	cursor: pointer;
+
+	.checkbox__inner {
+		position: relative;
+		width: calc(var(--size) / 1.75);
+		height: calc(var(--size) / 1.75);
+		border-radius: 50%;
+		background: var(--bg);
+		box-shadow:
+			inset 2px 2px 3px rgba(black, 0.12), inset 2px 2px 5px rgba(black, 0.08),
+			inset 3px 3px 12px rgba(black, 0.05), inset 4px 5px 16px rgba(black, 0.035),
+			inset 0px -1px 2px rgba(white, 0.45), inset -1px -1px 3px rgba(white, 0.45),
+			inset -1px -1px 2px rgba(white, 0.2), inset -1px -1px 2px rgba(white, 0.12),
+			2px 2px 2px rgba(white, 0.12), 2px 2px 3px rgba(white, 0.1),
+			2px 2px 5px rgba(white, 0.08), 6px 6px 15px rgba(black, 0.014),
+			8px 8px 18px rgba(black, 0.08), 12px 12px 28px rgba(black, 0.04);
+
+		.green__ball {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%) scale(0.5);
+			opacity: 0;
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			background: var(--color-checked);
+			box-shadow: inset 0 0 6px rgba(black, 0.12), inset -4px -5px 12px rgba(black, 0.12),
+				inset -5px -6px 12px rgba(black, 0.08), inset 0px -6px 18px rgba(black, 0.06);
+			transition: transform 250ms var(--transition-easing),
+      opacity 300ms var(--transition-easing);
+			transition-delay: 50ms;
+
+			&::after {
+				content: "";
+				position: absolute;
+				left: 50%;
+				top: 25%;
+				transform: translate(-50%, -50%);
+				background: #fff;
+				width: 35%;
+				height: 15%;
+				filter: blur(4px);
+			}
+		}
+	}
+}
 
 </style>
