@@ -3,14 +3,14 @@
     <!-- Presentación -->
     <section id="presentacion" class="home__presentacion">
       <!-- Fondo -->
-      <div class="backgroud-figure">
-        <svg class="wave-animation wave-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <!-- <div class="backgroud-figure"> -->
+        <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
           <path fill="#e2ddfc70" fill-opacity="1" d="M -213 65 C -135 -17 -142 -25 -91 -28 Q -60 -25 -43 -6 L -4 34 L 32 72 C 53.3 96 107 160 160 197.3 C 213.3 235 267 245 320 213.3 C 373.3 181 427 107 480 112 C 533.3 117 587 203 640 213.3 C 693.3 224 747 160 800 160 C 853.3 160 907 224 960 245.3 C 1013.3 267 1067 245 1120 202.7 C 1173.3 160 1227 96 1280 85.3 C 1333.3 75 1387 117 1413 138.7 L 1448 165 L 1522 213 C 1565 242 1611 263 1642 267 Q 1745 266 1796 322 L 1440 320 L 1413.3 320 C 1386.7 320 1333 320 1280 320 C 1226.7 320 1173 320 1120 320 C 1066.7 320 1013 320 960 320 C 906.7 320 853 320 800 320 C 746.7 320 693 320 640 320 C 586.7 320 533 320 480 320 C 426.7 320 373 320 320 320 C 266.7 320 213 320 160 320 C 106.7 320 53 320 27 320 C -202 322 -202 322 -568 330 L -418 236 L -336 175 Z L -169 21 Z" />
         </svg>
-        <svg class="wave-animation wave-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+        <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
           <path fill="#e2ddfc" fill-opacity="1" d="M -388 313 L -687 306 C -616 0 -555 -5 -463 32 L -261 182 C -178 240 -137 249 -25 230 C 85 210 133 132 166 105 C 214 74 267 53 320 80 C 373.3 107 427 181 480 213.3 C 533.3 245 587 235 640 224 C 693.3 213 747 203 800 170.7 C 853.3 139 907 85 960 106.7 C 1013.3 128 1067 224 1120 240 C 1173.3 256 1227 192 1280 144 C 1333.3 96 1387 64 1413 48 L 1440 32 C 1489 3 1506 19 1518 32 C 1535 54 1544 67 1578 97 C 1587 106 1598 111 1619 110 C 1633 108 1637 101.3333 1644 96 C 1651 91 1657 92 1664 96 C 1670 103 1716 128 1750 140 C 1760 144 1773 147 1787 146 C 1799 144 1805 141.3333 1817 131 Q 1823 127 1828 131 C 1833 134.6667 1838 138.3333 1843 142 L 1860 153 Q 1864 155 1869 155 C 1879 152 1883 151 1919 112 C 1942 90 1931 90 1959 101 C 1983 111 2005 112.6667 2031 101 S 2086 119 2109 121 C 2136 112 2136 118 2153 131 C 2185 162 2223 198 2258 232 C 2289 257 2320 289 2348 310 L 1751 318 L 1440 320 L 1413.3 320 C 1386.7 320 1333 320 1280 320 C 1226.7 320 1173 320 1120 320 C 1066.7 320 1013 320 960 320 C 906.7 320 853 320 800 320 C 746.7 320 693 320 640 320 C 586.7 320 533 320 480 320 C 426.7 320 373 320 320 320 C 266.7 320 213 320 160 320 C 106.7 320 53 320 27 320 L -76 320 L -241 317 Z" />
         </svg>
-      </div>
+      <!-- </div> -->
       <div class="presentacion-poligono-profesion"></div>
       <!-- Saludo -->
       <div class="presentacion-textos">
@@ -89,9 +89,10 @@ import { Options, Vue } from 'vue-class-component';
 export default class Home extends Vue {
   lastTime = 0;
   t = 1;
+  idAnimationFrame: number | null = null;
   vertices: any = [
-    { x: 285, y : 130 },
-    { x: 197, y : 130 },
+    { x: 285, y : 133 },
+    { x: 197, y : 133 },
     { x: 197, y : 36 },
     { x: 110, y : 36 },
   ];
@@ -136,20 +137,22 @@ export default class Home extends Vue {
       }
 
     });
+    this.crearAnimacionLineas();
+  }
 
+  crearAnimacionLineas(): void {
     if (!window.requestAnimationFrame){
       window.requestAnimationFrame = (callback: any) => {
         const currTime = new Date().getTime();
         const timeToCall = Math.max(0, 16 - ( currTime - this.lastTime));
 
-        const id = window.setTimeout( () => {
+        this.idAnimationFrame = window.setTimeout( () => {
           callback(currTime + timeToCall);
         }, timeToCall);
 
         this.lastTime = currTime + timeToCall;
-        return id;
+        return this.idAnimationFrame;
       };
-
     }
 
     if (!window.cancelAnimationFrame){
@@ -162,131 +165,70 @@ export default class Home extends Vue {
   mostrarOcultarLineaCanvas( index: number, event: any ): void {
     event.stopPropagation();
     const canvas: HTMLCanvasElement = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
-    const canvasWidth   = canvas?.width;
-    const canvasHeight  = canvas?.height;
     const ctx = canvas.getContext('2d');
     this.ctx = ctx;
     this.ctx.strokeStyle = '#005E74';
     this.ctx.lineWidth = 1;
+    // const canvasWidth   = canvas?.width;
+    // const canvasHeight  = canvas?.height;
     const esNumeroPar = index%2 === 0;
     const checked = event.target.checked;
 
     if (checked) {
       if (esNumeroPar) {
-        this.graficarLineaIzquierda( canvas, canvasWidth, canvasHeight, ctx )
+        this.points = this.calcWaypoints(this.vertices);
+        // extend the line from start to finish with animation
+        this.animate();
       }
     } else {
       // Limpiamos el canvas
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.t = 0;
+      window.cancelAnimationFrame(this.idAnimationFrame || 0);
     }
 
   }
 
-  graficarLineaIzquierda( canvas: HTMLCanvasElement | null, canvasWidth: number, canvasHeight: number, ctx: CanvasRenderingContext2D  | null  ): void {
-    // let startPointWidth = 12;
-    // let endPointWidth   = 15;
-
-    // let startPointHeight = 0;
-    // let endPointHeight   = 0;
-
-    // if (canvas && ctx) {
-    //   ctx.strokeStyle = '#040a24f5';
-    //   ctx.lineWidth = 1;
-    //   ctx.beginPath();
-
-    //   // Dibujar linea horizontal larga
-    //   startPointHeight = canvasHeight - 20;
-    //   for(let i = 1; i <= 18; i++) {
-
-    //     ctx.moveTo(canvasWidth - startPointWidth, startPointHeight);
-    //     ctx.lineTo(canvasWidth - endPointWidth, startPointHeight);
-    //     ctx.stroke();
-
-    //     if ( i < 18 ) {
-    //       startPointWidth = endPointWidth + 2;
-    //       endPointWidth   = startPointWidth + 3;
-    //     }
-
-    //   }
-
-    //   // Dibujar linea vertical
-    //   startPointHeight = 19;
-    //   endPointHeight   = startPointHeight + 4;
-
-    //   for(let i = 1; i <= 12 ; i++) {
-
-    //     ctx.moveTo(canvasWidth - (endPointWidth + 3), canvasHeight - startPointHeight);
-    //     ctx.lineTo(canvasWidth - (endPointWidth + 3), canvasHeight - endPointHeight);
-    //     ctx.stroke();
-
-    //     if ( i < 12 ) {
-    //       startPointHeight = endPointHeight + 2;
-    //       endPointHeight   = startPointHeight + 6;
-    //     }
-    //   }
-
-    //   // Ultima linea horizontal
-    //   startPointHeight = canvasHeight - (endPointHeight + 3);
-
-    //   startPointWidth = endPointWidth + 3;
-    //   endPointWidth = startPointWidth + 3;
-    //   for(let i = 1; i <= 12 ; i++) {
-
-    //     ctx.moveTo(canvasWidth - startPointWidth, startPointHeight);
-    //     ctx.lineTo(canvasWidth - endPointWidth, startPointHeight);
-    //     ctx.stroke();
-
-    //     if ( i < 12 ) {
-    //       startPointWidth = endPointWidth + 2;
-    //       endPointWidth   = startPointWidth + 3;
-    //     }
-    //   }
-
-    //   ctx.closePath();
-    // }
-
-    this.points = this.calcWaypoints(this.vertices);
-    // extend the line from start to finish with animation
-    this.animate();
-  }
 
   // Función que calcula los puntos que de la linea
-  calcWaypoints( vertices: any ) {
+  calcWaypoints( vertices: any[] ): any[] {
     const waypoints = [];
-    for (var i = 1; i < vertices.length; i++) {
-        var pt0 = vertices[i - 1];
-        var pt1 = vertices[i];
-        var dx = pt1.x - pt0.x;
-        var dy = pt1.y - pt0.y;
-        for (var j = 0; j < 100; j++) {
-            var x = pt0.x + dx * j / 100;
-            var y = pt0.y + dy * j / 100;
-            waypoints.push({
-                x: x,
-                y: y
-            });
-        }
+    for (let i = 1; i < vertices.length; i++) {
+      const pt0 = vertices[i - 1];
+      const pt1 = vertices[i];
+      const dx = pt1.x - pt0.x;
+      const dy = pt1.y - pt0.y;
+
+      for (let j = 0; j < 100; j++) {
+        const x = pt0.x + dx * j / 100;
+        const y = pt0.y + dy * j / 100;
+        waypoints.push({ x: x, y: y });
+      }
     }
     return waypoints;
   }
 
   // Función que dibuja la linea en el canvas
   animate(): void {
-    console.log('moveTo =>', this.points[ this.t - 1 ]);
-    console.log('lineTo =>', this.points[ this.t ]);
-
     if (this.t < this.points.length - 1) {
-      requestAnimationFrame( this.animate );
+      this.idAnimationFrame = requestAnimationFrame( this.animate );
     }
+
     // draw a line segment from the last waypoint
     // to the current waypoint
     this.ctx.beginPath();
-    const grosorLinea = 4;
-    this.ctx.moveTo(this.points[this.t + grosorLinea].x, this.points[this.t + grosorLinea].y);
-    this.ctx.lineTo(this.points[this.t].x, this.points[this.t].y);
-    this.ctx.stroke();
 
-    this.t = this.t + 6;
+    const grosorLinea = 4;
+    const puntoSiguientes = this.points[ this.t + grosorLinea ];
+    const puntoAnteriores = this.points[ this.t ];
+
+    if (puntoSiguientes && puntoAnteriores) {
+      this.ctx.moveTo(puntoSiguientes.x, puntoSiguientes.y);
+      this.ctx.lineTo(puntoAnteriores.x, puntoAnteriores.y);
+      this.ctx.stroke();
+
+      this.t = this.t + 6;
+    }
   }
 
 
@@ -313,11 +255,36 @@ export default class Home extends Vue {
     background: linear-gradient(90deg, rgba(4,10,36,1) 0%, rgba(4,13,42,1) 41%, rgba(8,34,61,1) 100%);
     background-attachment: fixed;
     height: calc(100vh - var(--navbar-height) );
-    .backgroud-figure {
+
+    .wave {
       position: absolute;
+      left: 0;
+      bottom: 0px;
       width: 100%;
-      bottom: -6px;
+      z-index: 1;
+      // animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
+      // transform: translate3d(0, 0, 0);
+      // background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; 
+      // position: absolute;
+      // top: -198px;
+      // width: 6400px;
+      // height: 198px;
+      // animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
+      // transform: translate3d(0, 0, 0);
+
+      // &:nth-child(1){
+      //   fill: #e2ddfc99;
+      //   animation: swell 7s ease -1.25s infinite;
+      // }
+
+      &:nth-child(2) {
+        fill: #e1dbff;
+        animation: swell 7s ease -1.25s infinite .2s;
+        // animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite;
+      }
+
     }
+
     .presentacion-poligono-profesion {
       position: absolute;
       height: 100%;
@@ -357,6 +324,8 @@ export default class Home extends Vue {
     background: var(--white);
     color: var(--primary);
     padding: 50px 0 0 0;
+    position: relative;
+    z-index: 100;
 
     .experiencia-laboral {
       display: flex;
@@ -396,16 +365,21 @@ export default class Home extends Vue {
   }
 }
 
-.wave-1 {
-  position: absolute;
-  path {
-    fill: #e2ddfc99;
+@keyframes wave {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -1600px;
   }
 }
 
-.wave-2 {
-  path {
-    fill: #e1dbff;
+@keyframes swell {
+  0%, 100% {
+    transform: translate3d(0, 1px,0);
+  }
+  50% {
+    transform: translate3d(0, 25px,0);
   }
 }
 
