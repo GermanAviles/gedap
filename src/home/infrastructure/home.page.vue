@@ -28,9 +28,17 @@
       <div class="experiencia-laboral">
         <!-- Canvas lineas -->
         <!-- Opcion time line -->
-        <div class="contenedor-time-line" v-for="(experiencia, index) of experiencias" :key="index">
+        <div
+          class="contenedor-time-line"
+          :id="'contenedor-time-line-' + index"
+          v-for="(experiencia, index) of experiencias"
+          :key="index"
+        >
           <!-- Camino que lleva a la tarjeta -->
-          <canvas class="canvas-lineas-secuencia" :id="'line-from-check-to-card-' + index"></canvas>
+          <canvas
+            class="canvas-lineas-secuencia"
+            :id="'line-from-check-to-card-' + index"
+          ></canvas>
 
           <!-- Tarjeta con información -->
           <div class="informacion-experiencia" :id="'informacion-exp-' + index">
@@ -87,18 +95,21 @@ import { Options, Vue } from 'vue-class-component';
   }
 })
 export default class Home extends Vue {
-  lastTime = 0;
-  t = 1;
+  lastTime        = 0;
+  intervaloLinea  = 1;
+  checkBoxIndex   = 0;
   idAnimationFrame: number | null = null;
+  canvas: any []  = [];
+
   vertices: any = [
-    { x: 285, y : 133 },
-    { x: 197, y : 133 },
-    { x: 197, y : 36 },
-    { x: 110, y : 36 },
+    { x: 625, y : 230 },
+    { x: 420, y : 230 },
+    { x: 420, y : 60 },
+    { x: 320, y : 60 },
   ];
-  ctx: any = null;
-  points: any = [];
-  experiencias = [
+  ctx: any      = null;
+  points: any   = [];
+  experiencias  = [
     { checked: false, mesesLaborados: 7,  descripcion: '',  empresa: 'Masseq proyectos e ingeniería S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
     { checked: false, mesesLaborados: 15, descripcion: '',  empresa: 'Interredes S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
     { checked: false, mesesLaborados: 5,  descripcion: '',  empresa: 'Sigenia S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() },
@@ -106,23 +117,24 @@ export default class Home extends Vue {
   ];
 
   mounted(): void {
-    const seccionExperiencia = document.getElementById('experiencia');
     this.experiencias.forEach( (item, index) => {
-      const canvas = document.getElementById(`line-from-check-to-card-${index}`);
-      const linea = document.getElementById(`line-${index}`);
-      const exper = document.getElementById(`informacion-exp-${index}`);
+      const contenedor  = document.getElementById(`contenedor-time-line-${index}`);
+      const canvas      = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
+      const linea       = document.getElementById(`line-${index}`);
+      const exper       = document.getElementById(`informacion-exp-${index}`);
+      const esNumeroPar = index%2 === 0;
 
       if (linea) {
-        // const pixelesMultiplicar = 20;
-        // linea.style.height = `${item.mesesLaborados > 12 ? 220 : item.mesesLaborados * pixelesMultiplicar}px`;
         linea.style.height = `200px`;
       }
 
       if (exper && canvas) {
-        const esNumeroPar = index%2 === 0;
-        const anchoCanvas = seccionExperiencia ? (seccionExperiencia.clientWidth * 0.5) : 0;
+        const anchoCanvas = contenedor ? (contenedor.clientWidth * 0.5) : 0;
+        const altoCanvas  = contenedor ? contenedor.clientHeight : 0;
         // Asignamos nuevo ancho al canvas
-        canvas.style.width = `${ anchoCanvas }px`;
+        canvas.width  = anchoCanvas;
+        canvas.height = altoCanvas;
+        this.crearVerticesYCanvas( index + 1, anchoCanvas, altoCanvas );
 
         if (esNumeroPar) {
           canvas.classList.add('float-top-left');
@@ -140,9 +152,59 @@ export default class Home extends Vue {
     this.crearAnimacionLineas();
   }
 
+  crearVerticesYCanvas( index: number, anchoCanvas: number, altoCanvas: number ): void {
+    const esNumeroPar = (index % 2 === 0) || false;
+    const vertices = this.crearVertices( esNumeroPar, anchoCanvas, altoCanvas );
+    const canvas   = {
+      ctx: null,
+      vertices
+    };
+
+
+    this.canvas.push( canvas );
+  }
+
+  crearVertices( esNumeroPar: boolean, anchoCanvas: number, altoCanvas: number ): any[] {
+    const vertices: any  = [];
+    let puntoX = 0;
+    let puntoY = altoCanvas * 0.9;
+
+    if ( esNumeroPar ) {
+      puntoX = anchoCanvas * 0.05;
+    } else {
+      puntoX = anchoCanvas * 0.95;
+    }
+
+    for( let i = 1; i <= 4; i++ ) {
+
+      vertices.push({
+        x: puntoX,
+        y: puntoY,
+      });
+
+      if (i === 1) {
+        puntoX = esNumeroPar ? anchoCanvas * 0.32 : anchoCanvas * 0.65;
+      }
+
+      if (i === 2) {
+        puntoY = altoCanvas * 0.2;
+      }
+
+      if (i === 3) {
+        puntoX = esNumeroPar ? anchoCanvas * 0.5 : anchoCanvas * 0.45;
+      }
+    }
+
+    return vertices;
+  }
+
+  /**
+   * @method crearAnimacionLineas()
+   * @description Función encargada de crear una animación
+   */
   crearAnimacionLineas(): void {
     if (!window.requestAnimationFrame){
-      window.requestAnimationFrame = (callback: any) => {
+      window.requestAnimationFrame = (callback) => {
         const currTime = new Date().getTime();
         const timeToCall = Math.max(0, 16 - ( currTime - this.lastTime));
 
@@ -157,40 +219,53 @@ export default class Home extends Vue {
 
     if (!window.cancelAnimationFrame){
       window.cancelAnimationFrame = (id) => {
+        this.intervaloLinea = 0;
         clearTimeout(id);
       };
     }
   }
 
+  /**
+   * @method mostrarOcultarLineaCanvas()
+   * @param index posición del checkbox que ha sido clickeado
+   * @param event evento click sobre el checkbox
+   * @description Función que muestra y oculta la linea desde el check hacía la tarjeta
+   */
   mostrarOcultarLineaCanvas( index: number, event: any ): void {
+    this.checkBoxIndex = index;
+
     event.stopPropagation();
-    const canvas: HTMLCanvasElement = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d');
-    this.ctx = ctx;
-    this.ctx.strokeStyle = '#005E74';
-    this.ctx.lineWidth = 1;
-    // const canvasWidth   = canvas?.width;
-    // const canvasHeight  = canvas?.height;
-    const esNumeroPar = index%2 === 0;
+    const canvas  = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
+    const ctx     = canvas.getContext('2d');
+
+    if (ctx) {
+      ctx.strokeStyle  = '#005E74';
+      ctx.lineWidth    = 1;
+      ctx.imageSmoothingEnabled = false;
+    }
+    this.canvas[ index ].ctx = ctx;
+
     const checked = event.target.checked;
 
     if (checked) {
-      if (esNumeroPar) {
-        this.points = this.calcWaypoints(this.vertices);
-        // extend the line from start to finish with animation
-        this.animate();
-      }
+      this.points = this.calcWaypoints( this.canvas[ index ].vertices );
+      // extend the line from start to finish with animation
+      this.animate();
     } else {
       // Limpiamos el canvas
-      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-      this.t = 0;
+      this.canvas[ index ].ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.intervaloLinea = 0;
       window.cancelAnimationFrame(this.idAnimationFrame || 0);
     }
 
   }
 
 
-  // Función que calcula los puntos que de la linea
+  /**
+   * @method calcWaypoints()
+   * @param vertices arreglo de las vertices en las que se desea dibujar
+   * @description Función que calcula los puntos entre vertices
+   */
   calcWaypoints( vertices: any[] ): any[] {
     const waypoints = [];
     for (let i = 1; i < vertices.length; i++) {
@@ -208,26 +283,34 @@ export default class Home extends Vue {
     return waypoints;
   }
 
-  // Función que dibuja la linea en el canvas
+  /**
+   * @method animate()
+   * @description Función que anima la linea a graficar
+   */
   animate(): void {
-    if (this.t < this.points.length - 1) {
+    if (this.intervaloLinea < this.points.length - 1) {
       this.idAnimationFrame = requestAnimationFrame( this.animate );
+    } else {
+      window.cancelAnimationFrame( this.idAnimationFrame || 0 );
     }
 
     // draw a line segment from the last waypoint
     // to the current waypoint
-    this.ctx.beginPath();
+    this.canvas[ this.checkBoxIndex ].ctx.beginPath();
 
-    const grosorLinea = 4;
-    const puntoSiguientes = this.points[ this.t + grosorLinea ];
-    const puntoAnteriores = this.points[ this.t ];
+    const grosorLinea = 9;
+    const puntoSiguientes = this.points[ this.intervaloLinea + grosorLinea ];
+    const puntoAnteriores = this.points[ this.intervaloLinea ];
 
     if (puntoSiguientes && puntoAnteriores) {
-      this.ctx.moveTo(puntoSiguientes.x, puntoSiguientes.y);
-      this.ctx.lineTo(puntoAnteriores.x, puntoAnteriores.y);
-      this.ctx.stroke();
+      this.canvas[ this.checkBoxIndex ].ctx.moveTo(puntoSiguientes.x, puntoSiguientes.y);
+      this.canvas[ this.checkBoxIndex ].ctx.lineTo(puntoAnteriores.x, puntoAnteriores.y);
+      this.canvas[ this.checkBoxIndex ].ctx.stroke();
 
-      this.t = this.t + 6;
+      this.intervaloLinea = this.intervaloLinea + 10;
+    } else {
+      window.cancelAnimationFrame( this.idAnimationFrame || 0 );
+      this.intervaloLinea = 0;
     }
   }
 
@@ -341,8 +424,6 @@ export default class Home extends Vue {
 
         .canvas-lineas-secuencia {
           position: absolute;
-          width: 100%;
-          height: 100%;
         }
 
         .informacion-experiencia {
