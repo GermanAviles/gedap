@@ -1,6 +1,6 @@
 import { httpProcessor } from '../../domain/models/http/http.interface';
 import { AxiosProcessor } from './axios/axios-processor';
-import { FetchProcessor } from './fetch/fetch-processor';
+// import { FetchProcessor } from './fetch/fetch-processor';
 
 export class HttpClient {
 

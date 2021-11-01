@@ -25,9 +25,30 @@
     </section>
     <!-- Experiencia laboral -->
     <section id="experiencia" class="home__experiencia">
+      <div style="padding: 25px;">
+        <tabs-experiencias
+          style="border: 1px solid black; height: 100px;"
+          :steps="[ 'Hola', 'Mundo', 'Desde', 'Slots' ]"
+        >
+          <template v-slot:step-0="{ step }">
+            <h1>{{ step }}</h1>
+          </template>
+          <template v-slot:step-1="{ step }">
+            <strong>{{ step }}</strong>
+          </template>
+          <template v-slot:step-2="{ step }">
+            <strong>{{ step }}</strong>
+          </template>
+          <template v-slot:step-3="{ step }">
+            <strong>{{ step }}</strong>
+          </template>
+        </tabs-experiencias>
+      </div>
       <div class="experiencia-laboral">
-        <!-- Canvas lineas -->
-        <!-- Opcion time line -->
+        <div class="experiencia-titulo">
+          <h2>Experiencia laboral</h2>
+        </div>
+        <!-- Time linea -->
         <div
           class="contenedor-time-line"
           :id="'contenedor-time-line-' + index"
@@ -42,28 +63,7 @@
 
           <!-- Tarjeta con información -->
           <div class="informacion-experiencia" :id="'informacion-exp-' + index">
-            <div class="card">
-              <div class="card-header">
-                <div class="contenido-header">
-                  <div class="nombre-empresa">
-                    <h4> {{ experiencia.empresa }} </h4>
-                  </div>
-                  <div class="fechas-trabajo">
-                    <span class="fecha-inicio"> Jun 06 2008 </span>
-                    <span class="fecha-fin"> Jun 06 2006 </span>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="contenido-body">
-                  <div class="habilidades-especificas">
-                    <ul class="lista-habilidades">
-                      <li class="habilidad"> habilidad </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <experiencia-laboral />
           </div>
 
           <!-- Check-box y linea vertical -->
@@ -89,9 +89,13 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import ExperienciaLaboral from '@/shared/infrastructure/components/experiencia-laboral.vue';
+import TabsExperiencias from '@/shared/infrastructure/components/tabs-experiencias.vue';
 
 @Options({
   components: {
+    'experiencia-laboral': ExperienciaLaboral,
+    'tabs-experiencias': TabsExperiencias
   }
 })
 export default class Home extends Vue {
@@ -116,16 +120,21 @@ export default class Home extends Vue {
     { checked: false, mesesLaborados: 4,  descripcion: '',  empresa: 'Expansión TI S.A.S.', urlEmpresa: '', fechaInicio: Date(), fechaFin: Date() }
   ];
 
+  /**
+   * @method mounted()
+   * @description Metodo propio de vue que se ejecuta después de renderizado el componente
+   * @return void
+  */
   mounted(): void {
     this.experiencias.forEach( (item, index) => {
       const contenedor  = document.getElementById(`contenedor-time-line-${index}`);
       const canvas      = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
       const linea       = document.getElementById(`line-${index}`);
       const exper       = document.getElementById(`informacion-exp-${index}`);
-      const esNumeroPar = index%2 === 0;
+      const esNumeroPar = index % 2 === 0;
 
       if (linea) {
-        linea.style.height = `200px`;
+        linea.style.height = `${ item.mesesLaborados * 13  }px`;
       }
 
       if (exper && canvas) {
@@ -152,6 +161,14 @@ export default class Home extends Vue {
     this.crearAnimacionLineas();
   }
 
+  /**
+   * @method crearVerticesYCanvas()
+   * @param index verifica si se va a crear las vertices hacía la derecha o izquierda
+   * @param anchoCanvas el tamaño del canvas
+   * @param altoCanvas el alto del canvas
+   * @description Función encargada de crear los vertices y canvas para el array
+   * @return void
+  */
   crearVerticesYCanvas( index: number, anchoCanvas: number, altoCanvas: number ): void {
     const esNumeroPar = (index % 2 === 0) || false;
     const vertices = this.crearVertices( esNumeroPar, anchoCanvas, altoCanvas );
@@ -164,16 +181,25 @@ export default class Home extends Vue {
     this.canvas.push( canvas );
   }
 
+  /**
+   * @method crearVertices()
+   * @param esNumeroPar verifica si se va a crear las vertices hacía la derecha o izquierda
+   * @param anchoCanvas el tamaño del canvas
+   * @param altoCanvas el alto del canvas
+   * @description Función encargada de crear los vertices en donde se dibujará
+   * @return Lista de vertices
+  */
   crearVertices( esNumeroPar: boolean, anchoCanvas: number, altoCanvas: number ): any[] {
     const vertices: any  = [];
     let puntoX = 0;
-    let puntoY = altoCanvas * 0.9;
+    let puntoY = altoCanvas - 30;
 
     if ( esNumeroPar ) {
-      puntoX = anchoCanvas * 0.05;
+      puntoX = 25;
     } else {
-      puntoX = anchoCanvas * 0.95;
+      puntoX = anchoCanvas - 25;
     }
+
 
     for( let i = 1; i <= 4; i++ ) {
 
@@ -191,7 +217,7 @@ export default class Home extends Vue {
       }
 
       if (i === 3) {
-        puntoX = esNumeroPar ? anchoCanvas * 0.5 : anchoCanvas * 0.45;
+        puntoX = esNumeroPar ? anchoCanvas * 0.85 : anchoCanvas * 0.15;
       }
     }
 
@@ -201,7 +227,7 @@ export default class Home extends Vue {
   /**
    * @method crearAnimacionLineas()
    * @description Función encargada de crear una animación
-   */
+  */
   crearAnimacionLineas(): void {
     if (!window.requestAnimationFrame){
       window.requestAnimationFrame = (callback) => {
@@ -230,13 +256,14 @@ export default class Home extends Vue {
    * @param index posición del checkbox que ha sido clickeado
    * @param event evento click sobre el checkbox
    * @description Función que muestra y oculta la linea desde el check hacía la tarjeta
-   */
+  */
   mostrarOcultarLineaCanvas( index: number, event: any ): void {
     this.checkBoxIndex = index;
 
     event.stopPropagation();
-    const canvas  = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
-    const ctx     = canvas.getContext('2d');
+    const canvas    = document.getElementById(`line-from-check-to-card-${index}`) as HTMLCanvasElement;
+    const cardInfo  = document.getElementById(`informacion-exp-${index}`);
+    const ctx       = canvas.getContext('2d');
 
     if (ctx) {
       ctx.strokeStyle  = '#005E74';
@@ -258,6 +285,8 @@ export default class Home extends Vue {
       window.cancelAnimationFrame(this.idAnimationFrame || 0);
     }
 
+    cardInfo?.classList.toggle('show');
+
   }
 
 
@@ -265,7 +294,7 @@ export default class Home extends Vue {
    * @method calcWaypoints()
    * @param vertices arreglo de las vertices en las que se desea dibujar
    * @description Función que calcula los puntos entre vertices
-   */
+  */
   calcWaypoints( vertices: any[] ): any[] {
     const waypoints = [];
     for (let i = 1; i < vertices.length; i++) {
@@ -286,7 +315,7 @@ export default class Home extends Vue {
   /**
    * @method animate()
    * @description Función que anima la linea a graficar
-   */
+  */
   animate(): void {
     if (this.intervaloLinea < this.points.length - 1) {
       this.idAnimationFrame = requestAnimationFrame( this.animate );
@@ -345,20 +374,6 @@ export default class Home extends Vue {
       bottom: 0px;
       width: 100%;
       z-index: 1;
-      // animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
-      // transform: translate3d(0, 0, 0);
-      // background: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg') repeat-x; 
-      // position: absolute;
-      // top: -198px;
-      // width: 6400px;
-      // height: 198px;
-      // animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
-      // transform: translate3d(0, 0, 0);
-
-      // &:nth-child(1){
-      //   fill: #e2ddfc99;
-      //   animation: swell 7s ease -1.25s infinite;
-      // }
 
       &:nth-child(2) {
         fill: #e1dbff;
@@ -428,6 +443,17 @@ export default class Home extends Vue {
 
         .informacion-experiencia {
           position: absolute;
+          // display: none;
+          z-index: 10;
+          opacity: 0;
+          transition-property: opacity;
+          transition-duration: .4s;
+          transition-delay: .2s;
+          transition-timing-function: ease;
+        }
+
+        .show {
+          opacity: 1;
         }
 
         .check-box-line {
@@ -474,142 +500,6 @@ export default class Home extends Vue {
   right: 40px;
 }
 
-.card {
-  min-width: 280px;
-  max-width: 400PX;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  word-wrap: break-word;
-  background-color: #fefefe;
-  background-clip: border-box;
-  border: 0 solid #e0e0e0;
-  border-radius: .25rem;
-  margin-bottom: 24px;
-  padding: 10px;
-  box-shadow:
-    2px 2px 3px rgba(black, 0.12), 2px 2px 6px rgba(black, 0.05),
-		2px 2px 10px rgba(black, 0.025), inset -2px -2px 3px rgba(black, 0.05),
-		inset -2px -2px 8px rgba(black, 0.02), inset 1px 3px 3px rgba(white, 0.45),
-		inset 3px 8px 25px rgba(white, 0.35), inset 3px 2px 3px rgba(white, 0.35),
-		inset 3px 2px 5px rgba(white, 0.2), inset 2px 3px 8px rgba(white, 0.085),
-		inset 3px 2px 18px rgba(white, 0.05), inset 2px 3px 25px rgba(white, 0.025),
-		inset 8px 8px 18px rgba(white, 0.1), inset 8px 8px 25px rgba(white, 0.05);
-}
-
-.card-body {
-  flex: 1 1 auto;
-  min-height: 1px;
-  padding: 0.5rem 1.2rem;
-}
-
-.card-header {
-  flex: 1 1 auto;
-  min-height: 1px;
-  padding: 5px;
-}
-
-.contenido-header {
-  display: flex;
-  flex-flow: column;
-  justify-content: space-between;
-
-  .nombre-empresa {
-    font-size: 1.1rem;
-    padding: 0 1px;
-    font-weight: 500;
-    margin-bottom: 8px;
-  }
-
-  .fechas-trabajo {
-    display: flex;
-    flex-flow: row wrap;
-    padding: 0 5px;
-
-    span {
-      display: inline-block;
-      padding: 1px 9px;
-      border-radius: 14px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-
-    .fecha-inicio {
-      margin: 0 5px 0 0;
-      background-color: #64718a;
-      color: var(--white);
-    }
-
-    .fecha-fin {
-      margin: 0 0 0 5px;
-      background-color: #1f355f;
-      color: var(--white);
-    }
-  }
-
-}
-
-.contenido-body {
-  .habilidades-especificas {
-    ul.lista-habilidades {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-  }
-}
-// .wave-animation {
-//   animation: move-forever 10s cubic-bezier(.55, .5, .45, .5) infinite;
-//   &:nth-child(1) {
-//     animation-delay: -2s;
-//     animation-duration: 7s;
-//   }
-//   &:nth-child(2) {
-//     animation-delay: -4s;
-//     animation-duration: 13s;
-//   }
-// }
-
-// @keyframes move-forever {
-//   0% {
-//     transform: translate3d(-90px, 0, 0);
-//   }
-
-//   100% {
-//     transform: translate3d(85px, 0, 0);
-//   }
-// }
-// .cont-input-check {
-//   position: relative;
-//   padding: 30px 0;
-//   width: 12.25%;
-//   height: auto;
-// }
-
-// input[type='checkbox']#checkbox-t+label {
-//   border: 1px solid rgb(0, 0, 0);
-//   background: tranparent;
-//   border-radius: 50%;
-// }
-
-// input[type='checkbox']#checkbox-t+label::before {
-//   content: '';
-//   width: 20px;
-//   height: 20px;
-//   top: 0;
-//   left: 0;
-//   bottom: -60px;
-//   right: 0;
-//   position: absolute;
-//   margin: auto;
-//   background: rgb(0, 0, 0);
-//   border-radius: 50%;
-//   transition: 0.2s, ease, all;
-// }
-
-// input[type='checkbox']#checkbox-t:checked+label::before {
-//   bottom: 0;
-// }
 
 input[type="checkbox"] {
 	display: none;
